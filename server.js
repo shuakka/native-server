@@ -29,14 +29,14 @@ app.get("/api/endpoint/health", (req, res) => {
 app.post('/api/endpoint/login',async (req, res) => {
     const { Number, password } = req.body;
     const data=req.body.query;
-    console.log(req.body,"Called servernows1",data.Number)
-    console.log("Called servernows2",data.password)
+    // console.log(req.body,"Called servernows1",data.Number)
+    // console.log("Called servernows2",data.password)
 
     try {
         // Replace with your actual API URL
         const response = await axios.post('http://13.50.183.255:9003/user-service/auth/login', {
-            "username": data.Number.value,
-            "password": data.password.value
+            "username": data.Number,
+            "password": data.password
         });
 
         // Forward the response data back to the client
@@ -75,29 +75,35 @@ app.post('/api/endpoint/logout', async (req, res) => {
 });
 
 app.post('/api/endpoint/checkin', async (req, res) => {
-    const { Number, password } = req.body;
     const querystring=req.body.query;
-    console.log("Called servernows1",querystring.userId.value)
-    console.log("Called servernows2",querystring.date.value)
-    var accesstoken = req.headers.accesstoken;
+    console.log("Called servernows1",querystring.userId)
+    var token = querystring.Authorization;
     var date = new Date();
-    console.log(d.toJSON().slice(0,19).replace('T',':'));
+    var formattedDate = date.getFullYear() + '-' +
+    ('0' + (date.getMonth() + 1)).slice(-2) + '-' +
+    ('0' + date.getDate()).slice(-2) + ' ' +
+    ('0' + date.getHours()).slice(-2) + ':' +
+    ('0' + date.getMinutes()).slice(-2) + ':' +
+    ('0' + date.getSeconds()).slice(-2);
 
+console.log(token);
+    console.log("Called servernows2token---",typeof (querystring.userId))
     const data={
-            
-        "userId": 3,
-        "date": date,
-        "checkIn": date,
+        "userId": querystring.userId,
+        "date": formattedDate,
+        "checkIn": formattedDate,
         "latitude": "14.989898",
         "longitude": "22.989898",
         "remarks": "Test 1"
-    
         }
     const axiosConfig = {
         headers: {
-          Authorization: ` ${accesstoken}`,
+          Authorization: ` ${token}`,
+           "Content-Type": "application/json"
         },
       };
+      console.log(data,"-Complete data")
+      console.log("config of axios",axiosConfig)
     try {
         // Replace with your actual API URL
         const response = await axios.post('http://13.50.183.255:9003/user-service/attendance/checkIn',data,axiosConfig );
@@ -115,21 +121,29 @@ app.post('/api/endpoint/checkin', async (req, res) => {
 });
 
 app.post('/api/endpoint/checkout', async (req, res) => {
-    const { Number, password } = req.body;
-    var accesstoken = req.headers.accesstoken;
-    const querydata=req.body.query;
-    console.log("Called servernows1",querydata.userId)
+    const querystring=req.body.query;
+    console.log("Called servernows1",querystring.userId)
+    var token = querystring.Authorization;
+    var userId = querystring.userId;
     var date = new Date();
-    console.log(d.toJSON().slice(0,19).replace('T',':'));
+    var formattedDate = date.getFullYear() + '-' +
+    ('0' + (date.getMonth() + 1)).slice(-2) + '-' +
+    ('0' + date.getDate()).slice(-2) + ' ' +
+    ('0' + date.getHours()).slice(-2) + ':' +
+    ('0' + date.getMinutes()).slice(-2) + ':' +
+    ('0' + date.getSeconds()).slice(-2);
+
+console.log(formattedDate);
     const data={
-        "id": querydata.userId,
-        "checkOut": date
+        "id": userId,
+        "checkOut": formattedDate
     }
     const axiosConfig = {
         headers: {
-          Authorization: ` ${accesstoken}`,
+          Authorization: ` ${token}`,
         },
       };
+      console.log("all data----------",data)
     try {
         // Replace with your actual API URL
         const response = await axios.post('http://13.50.183.255:9003/user-service/attendance/checkOut', data,axiosConfig);
@@ -147,11 +161,13 @@ app.post('/api/endpoint/checkout', async (req, res) => {
 });
 
 app.get('/api/endpoint/attendanceHistory', async (req, res) => {
-    var accesstoken = req.headers.accesstoken;
-
+    const querystring=req.body.query;
+    console.log("Called serverntokentokentokentokenows1--",JSON.stringify(req.query))
+    var token = req.query.Authorization;
+    console.log("Called token--",req.query.Authorization)
     const axiosConfig = {
         headers: {
-          Authorization: ` ${accesstoken}`,
+          Authorization: `${token}`,
         },
       };
     try {
@@ -173,14 +189,14 @@ app.get('/api/endpoint/attendanceHistory', async (req, res) => {
 
 //Worker API
 app.get('/api/endpoint/userDetail', async (req, res) => {
-    var accesstoken = req.headers.accesstoken;
+    var token = req.headers.token;
     const userId=req.body.query.userId;
 
     console.log("Called servernows1",userId)
  
     const axiosConfig = {
         headers: {
-          Authorization: ` ${accesstoken}`,
+          Authorization: ` ${token}`,
         },
       };
     try {
@@ -200,7 +216,7 @@ app.get('/api/endpoint/userDetail', async (req, res) => {
 });
 
 app.post('/api/endpoint/updateUser', async (req, res) => {
-    var accesstoken = req.headers.accesstoken;
+    var token = req.headers.token;
     const querydata=req.body.query;
     const firstName=querydata.firstName
     const lastName=querydata.lastName
@@ -214,7 +230,7 @@ app.post('/api/endpoint/updateUser', async (req, res) => {
     }
     const axiosConfig = {
         headers: {
-          Authorization: ` ${accesstoken}`,
+          Authorization: ` ${token}`,
         },
       };
     try {
